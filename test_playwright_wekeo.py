@@ -25,9 +25,10 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
 # ── Config ────────────────────────────────────────────────────────────────────
-USERNAME       = os.environ.get("WEKEO_USER", "")
+USERNAME       = os.environ.get("WEKEO_USER", "gkoenig")
 PASSWORD       = os.environ.get("WEKEO_PASS", "")
 DATASET_HINT   = os.environ.get("WEKEO_DATASET", "EO:ESA:DAT:SENTINEL-2")
+LAYER_HINT = os.environ.get("WEKEO_LAYER", "True color")
 MOUSE_INTERVAL = int(os.environ.get("MOUSE_INTERVAL", "5"))
 CHECK_INTERVAL = int(os.environ.get("CHECK_INTERVAL", "10"))
 HEADLESS       = os.environ.get("HEADLESS", "false").lower() == "true"
@@ -188,25 +189,54 @@ def main():
         if "catalogue" not in page.url:
             page.goto(CATALOGUE_URL, wait_until="networkidle")
 
-        log("Selecting a dataset…")
-        dataset_selector = ", ".join([
-            "app-dataset-card",
-            ".dataset-card",
-            ".dataset-item",
-            "mat-card",
-            ".result-item",
-        ])
-        page.wait_for_selector(dataset_selector, timeout=20000)
+        log("Searching for dataset…")
 
-        if DATASET_HINT:
-            dataset_el = page.locator(dataset_selector).filter(has_text=DATASET_HINT).first
-        else:
-            dataset_el = page.locator(dataset_selector).first
-
-        dataset_name = (dataset_el.text_content() or "(unknown)").strip()[:80]
-        log(f'Clicking dataset: "{dataset_name}…"')
-        dataset_el.click()
+        # Search for the dataset using the free-text box
+        search_box = page.get_by_role("textbox", name="Free-text")
+        search_box.wait_for(state="visible", timeout=15000)
+        search_box.click()
+        search_box.fill(DATASET_HINT)
+        log(f"Typed dataset hint: {DATASET_HINT}")
         page.wait_for_load_state("networkidle")
+
+        # After fill and wait, dump what buttons are visible
+        page.wait_for_load_state("networkidle")
+
+        # Screenshot to see what the page looks like
+        page.screenshot(path="debug_catalogue.png")
+
+        # Click "Select layers" button on the first result
+        log("Clicking 'Select layers'…")
+        page.get_by_role("button", name="Use Dataset").first.click(force=True)
+        page.wait_for_load_state("networkidle")
+
+
+        # DEBUG: screenshot + dump visible text
+        page.screenshot(path="after_use_dataset.png")
+        log("Page title: " + page.title())
+        log("Page URL: " + page.url)
+
+        # Dump all visible text elements
+        texts = page.locator("*:visible").all_text_contents()
+        log("Visible texts on page:")
+        for t in texts[:50]:  # limit to first 50
+            t = t.strip()
+            if t:
+                print(f"  '{t}'")
+
+        # Select the layer (e.g. "True color")
+        LAYER_HINT = os.environ.get("WEKEO_LAYER", "True color")
+        log(f"Selecting layer: {LAYER_HINT}")
+        page.get_by_text(LAYER_HINT).click()
+        page.wait_for_load_state("networkidle")
+
+        # Click the action button (the 8th list item's button from codegen)
+        log("Clicking dataset action button…")
+        page.locator(
+            "li:nth-child(8) > .jsx-ef4f6a8dd706a6be.buttons-wrapper > .jsx-ef4f6a8dd706a6be"
+        ).click()
+        page.wait_for_load_state("networkidle")
+
         log("Dataset opened.")
 
         # ── Step 5: Mouse agitation + session timer loop ──────────────────────
