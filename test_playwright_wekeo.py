@@ -166,12 +166,17 @@ def search_dataset(page: Page):
 
 def open_dataset(page: Page):
     log("Clicking 'Use Dataset'…")
-    page.wait_for_timeout(1000)  # let React settle after search
-    page.get_by_role("button", name="Use Dataset").first.click(force=True)
-    page.wait_for_load_state("networkidle")
-    screenshot(page, "after_use_dataset")
-    log(f"URL after Use Dataset: {page.url}")
-    dump_visible_text(page)
+    page.wait_for_timeout(2000)
+    screenshot(page, "debug_before_use_dataset")
+
+    # Dump all buttons visible on page
+    buttons = page.get_by_role("button").all()
+    log(f"Found {len(buttons)} buttons:")
+    for btn in buttons:
+        txt = btn.text_content() or ""
+        log(f"  button: '{txt.strip()}'")
+
+    page.get_by_role("button", name="Select layers").first.click(force=True)
 
 def select_layer(page: Page):
     log(f"Selecting layer: {LAYER_HINT}")
