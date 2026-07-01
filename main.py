@@ -7,7 +7,7 @@ from browser import create_browser, create_context
 from auth import accept_cookies, login
 from navigation import navigate_to_dataset
 from monitor import keep_alive
-from utils import log
+from utils import log, parse_args
 
 
 def run(config: Config):
@@ -35,7 +35,8 @@ def run(config: Config):
 
 
 def main():
-    config = Config.from_env()
+    args = parse_args()
+    config = Config.from_env_and_args(args)
     run(config)
 
 
