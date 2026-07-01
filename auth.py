@@ -2,14 +2,26 @@ from playwright.sync_api import Page, TimeoutError as PWTimeout
 from config import Config
 from utils import log, screenshot
 
+LOGIN_BANNER_SELECTOR = 'a[href*="identity.prod.wekeo2.eu/oauth2/authorize"]'
+# ^ reuse the exact selector _click_login_link already trusts and waits on successfully
 
-def is_session_alive(page: Page) -> bool:
-    if any(k in page.url for k in ("login", "signin", "auth")):
+def is_session_alive(page: Page, timeout: int = 8000) -> bool:
+    """
+    We detect the login banner (the one containing the OAuth login link).
+    Its presence means "not logged in"; its absence means "logged in".
+    We actively wait (poll) rather than snapshot, so we don't mistake
+    "banner hasn't rendered yet" for "banner will never appear".
+    """
+    if any(k in page.url for k in ("login", "signin", "auth", "identity.prod.wekeo2.eu")):
         return False
-    return page.query_selector(
-        'a[href*="login"], button:has-text("Log in"), button:has-text("Sign in")'
-    ) is None
 
+    try:
+        page.locator(LOGIN_BANNER_SELECTOR).first.wait_for(state="visible", timeout=timeout)
+        # Banner showed up within the window -> not authenticated
+        return False
+    except PWTimeout:
+        # Banner never appeared in time -> assume authenticated
+        return True
 
 def accept_cookies(page: Page, timeout: int = 5000):
     try:
@@ -24,7 +36,7 @@ def accept_cookies(page: Page, timeout: int = 5000):
 def _click_login_link(page: Page):
     log("Looking for login link…")
     try:
-        link = page.locator('a[href*="identity.prod.wekeo2.eu/oauth2/authorize"]').first
+        link = page.locator(LOGIN_BANNER_SELECTOR).first
         link.wait_for(timeout=10000)
         link.click()
         page.wait_for_load_state("networkidle")
@@ -83,7 +95,7 @@ def _check_login_error(page: Page):
 
 def _confirm_returned_to_wekeo(page: Page):
     try:
-        page.wait_for_url("**/wekeo.copernicus.eu/**", timeout=30000)
+        page.wait_for_url(lambda url: "wekeo.copernicus.eu" in url, timeout=30000)
         page.wait_for_load_state("networkidle")
     except PWTimeout:
         screenshot(page, "debug_post_login")
@@ -95,7 +107,15 @@ def login(page: Page, config: Config):
         log("Already logged in via existing session, skipping login.")
         return
 
-    _click_login_link(page)
+    try:
+        _click_login_link(page)
+    except RuntimeError:
+        # Re-check: maybe we WERE logged in and the ambiguous state fooled us
+        if is_session_alive(page):
+            log("Session turned out to be alive after all — skipping login.")
+            return
+        raise
+
     _handle_wso2_warnings(page)
     _fill_credentials(page, config)
     _check_login_error(page)

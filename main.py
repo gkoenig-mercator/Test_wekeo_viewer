@@ -25,6 +25,7 @@ def main():
     with sync_playwright() as p:
         browser = create_browser(p, config)
         context, page = create_context(browser)
+        page.goto(config.catalogue_url, wait_until="domcontentloaded")
 
         try:
             accept_cookies(page)
@@ -33,7 +34,7 @@ def main():
         except Exception as e:
             storage.log(f"Error: {e}")
             storage.save_screenshot(page, "error")
-            storage.save_result(duration_seconds=int(session.elapsed()), disconnect_reason="error",config=config)
+            storage.save_result(duration_seconds=int(session.elapsed()), disconnect_reason="error")
             context.close()
             browser.close()
             return
