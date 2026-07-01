@@ -18,26 +18,41 @@ playwright install
 
 Credentials are passed via environment variables:
 
-| Variable | Description | Default |
-|---|---|---|
-| `WEKEO_USER` | WEkEO username or email | *(required)* |
-| `WEKEO_PASS` | WEkEO password | *(required)* |
-| `WEKEO_DATASET` | Partial dataset name to select | `EO:ESA:DAT:SENTINEL-2` |
-| `WEKEO_LAYER` | Layer name to use | `True color` |
-| `MOUSE_INTERVAL` | Seconds between simulated mouse moves | `5` |
-| `CHECK_INTERVAL` | Seconds between session health checks | `10` |
-| `HEADLESS` | Run browser headless (`true`/`false`) | `false` |
+| Variable     | Description                  | Default    |
+|--------------|------------------------------|------------|
+| `WEKEO_USER` | WEkEO username or email      | *(required)* |
+| `WEKEO_PASS` | WEkEO password               | *(required)* |
 
 ## Usage
 
 ```bash
-python main.py
+python main.py [options]
+```
+
+### Options
+
+| Argument | Short | Choices | Default | Description |
+|---|---|---|---|---|
+| `--browser` | `-b` | `chromium`, `firefox`, `webkit` | `chromium` | Browser to use |
+| `--mouse-interval` | `-m` | any integer | `5` | Seconds between simulated mouse moves |
+| `--check-interval` | `-c` | any integer | `10` | Seconds between session health checks |
+| `--headless` | | | `false` | Run browser without a visible window |
+
+### Examples
+
+```bash
+# Run with Firefox
+python main.py --browser firefox
+
+# Run headless with faster checks
+python main.py --headless --check-interval 5
+
+# Short flags
+python main.py -b webkit -m 10 -c 30
 ```
 
 The script will log the disconnection time and any relevant events during the test session.
 
 ## Roadmap / Future Features
 
-1. CLI interface for easier execution and configuration
-2. Choose browser, dataset, and mouse movement options via CLI
-3. Save disconnection time results to an Excel sheet or database
+1. Save disconnection time results to an Excel sheet or database

@@ -24,6 +24,7 @@ def run(config: Config):
             log(f"Current URL: {page.url}")
 
             login(page, config)
+            print(config)
             navigate_to_dataset(page, config)
 
         except (RuntimeError, ValueError) as e:
