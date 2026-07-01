@@ -1,3 +1,4 @@
+# utils.py
 import time
 from datetime import datetime
 import argparse
@@ -26,34 +27,18 @@ def dump_visible_text(page: Page, limit: int = 50):
         if t:
             print(f"  '{t}'")
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="WEkEO Session Timer - simulates a viewer session and measures disconnection time."
     )
-
     parser.add_argument(
         "--browser",
         choices=["chromium", "firefox", "webkit"],
         default=None,
-        help="Browser to use (default: chromium)",
     )
-    parser.add_argument(
-        "--mouse-interval",
-        type=int,
-        default=None,
-        help="Seconds between mouse movements (default: 5)",
-    )
-    parser.add_argument(
-        "--check-interval",
-        type=int,
-        default=None,
-        help="Seconds between session checks (default: 10)",
-    )
-    parser.add_argument(
-        "--headless",
-        action="store_true",
-        default=None,
-        help="Run in headless mode",
-    )
+    parser.add_argument("--mouse-interval", type=int, default=None)
+    parser.add_argument("--check-interval", type=int, default=None)
+    parser.add_argument("--headless", action="store_true", default=None)
 
     return parser.parse_args()
