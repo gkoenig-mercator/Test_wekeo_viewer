@@ -20,9 +20,12 @@ def keep_alive(page: Page, browser: Browser, config: Config, storage: Storage, s
 
     def handle_sigint(sig, frame):
         storage.log(f"\nStopped manually after {minutes_formatting_for_elapse_time(storage.session.elapsed())}.")
-        storage.save_screenshot(page, "session_manual_stop")
+        try:
+            storage.save_screenshot(page, "session_manual_stop", timeout=5000)
+        except Exception as e:
+            storage.log(f"Could not save screenshot on manual stop: {e}")
         storage.save_result(
-            duration_seconds=session.elapsed(),
+            duration_seconds=storage.session.elapsed(),
             disconnect_reason="manual_stop",
             config=config
         )
@@ -49,7 +52,7 @@ def keep_alive(page: Page, browser: Browser, config: Config, storage: Storage, s
 
         if now - last_check >= config.check_interval:
             if not is_session_alive(page):
-                storage.log(f"\nSession expired after {minutes_formatting_for_elapse_time(session.elapsed())}!")
+                storage.log(f"\nSession expired after {minutes_formatting_for_elapse_time(storage.session.elapsed())}!")
                 storage.log(f"Final URL: {page.url}")
                 storage.save_screenshot(page, "session_expired")
                 storage.save_result(
