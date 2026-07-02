@@ -9,8 +9,8 @@ def log(msg: str):
     print(f"[{datetime.now().isoformat(timespec='seconds')}] {msg}", flush=True)
 
 
-def elapsed(start: float) -> str:
-    s = int(time.time() - start)
+def minutes_formatting_for_elapse_time(seconds: float) -> str:
+    s = int(seconds)
     return f"{s // 60}m {s % 60}s"
 
 

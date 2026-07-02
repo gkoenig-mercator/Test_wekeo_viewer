@@ -8,7 +8,7 @@ from playwright.sync_api import Page, Browser
 from auth import is_session_alive
 from config import Config
 from storage import Storage
-from utils import elapsed
+from utils import minutes_formatting_for_elapse_time
 
 
 def keep_alive(page: Page, browser: Browser, config: Config, storage: Storage, start_time: float):
@@ -19,10 +19,10 @@ def keep_alive(page: Page, browser: Browser, config: Config, storage: Storage, s
     storage.log("Press Ctrl+C to stop.\n")
 
     def handle_sigint(sig, frame):
-        storage.log(f"\nStopped manually after {elapsed(start_time)}.")
+        storage.log(f"\nStopped manually after {minutes_formatting_for_elapse_time(storage.session.elapsed())}.")
         storage.save_screenshot(page, "session_manual_stop")
         storage.save_result(
-            duration_seconds=int(time.time() - start_time),
+            duration_seconds=session.elapsed(),
             disconnect_reason="manual_stop",
             config=config
         )
@@ -44,21 +44,21 @@ def keep_alive(page: Page, browser: Browser, config: Config, storage: Storage, s
                 direction *= -1
             mouse_y = 400 + int(math.sin(now / 2) * 80)
             page.mouse.move(mouse_x, mouse_y)
-            storage.log(f"Mouse → ({mouse_x}, {mouse_y})  —  {elapsed(start_time)} elapsed")
+            storage.log(f"Mouse → ({mouse_x}, {mouse_y})  —  {minutes_formatting_for_elapse_time(storage.session.elapsed())} elapsed")
             last_mouse = now
 
         if now - last_check >= config.check_interval:
             if not is_session_alive(page):
-                storage.log(f"\nSession expired after {elapsed(start_time)}!")
+                storage.log(f"\nSession expired after {minutes_formatting_for_elapse_time(session.elapsed())}!")
                 storage.log(f"Final URL: {page.url}")
                 storage.save_screenshot(page, "session_expired")
                 storage.save_result(
-                    duration_seconds=int(time.time() - start_time),
+                    duration_seconds= storage.session.elapsed(),
                     disconnect_reason="session_expired"
                 )
                 browser.close()
                 sys.exit(0)
-            storage.log(f"Session alive — {elapsed(start_time)} elapsed.")
+            storage.log(f"Session alive — {minutes_formatting_for_elapse_time(storage.session.elapsed())} elapsed.")
             last_check = now
 
         time.sleep(1)
