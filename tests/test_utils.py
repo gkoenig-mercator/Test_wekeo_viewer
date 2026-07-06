@@ -1,4 +1,5 @@
 """Tests for utils.py"""
+
 import pytest
 from utils import minutes_formatting_for_elapse_time, parse_args
 
@@ -62,12 +63,17 @@ class TestParseArgs:
 
     def test_multiple_args(self):
         """Test multiple arguments together."""
-        args = parse_args([
-            "--browser", "webkit",
-            "--mouse-interval", "7",
-            "--check-interval", "12",
-            "--headless"
-        ])
+        args = parse_args(
+            [
+                "--browser",
+                "webkit",
+                "--mouse-interval",
+                "7",
+                "--check-interval",
+                "12",
+                "--headless",
+            ]
+        )
         assert args.browser == "webkit"
         assert args.mouse_interval == 7
         assert args.check_interval == 12

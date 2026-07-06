@@ -1,4 +1,5 @@
 """Tests for storage.py"""
+
 import csv
 import os
 from unittest.mock import MagicMock
@@ -26,7 +27,7 @@ class TestStorageWithTempDir:
         run_dir = temp_dir / "run1"
         run_dir.mkdir(parents=True, exist_ok=True)
         (temp_dir / "runs").mkdir(exist_ok=True)
-        
+
         mock_session.run_dir = run_dir
         mock_session.config = mock_config
 
@@ -34,10 +35,10 @@ class TestStorageWithTempDir:
         try:
             os.chdir(temp_dir)
             storage = Storage(mock_session)
-            
+
             # Verify CSV was created with headers
             assert storage.csv_path.exists()
-            with open(storage.csv_path, 'r') as f:
+            with open(storage.csv_path, "r") as f:
                 reader = csv.reader(f)
                 headers = next(reader)
                 assert headers == CSV_HEADERS
@@ -50,7 +51,7 @@ class TestStorageWithTempDir:
         run_dir = temp_dir / "run1"
         run_dir.mkdir(parents=True, exist_ok=True)
         (temp_dir / "runs").mkdir(exist_ok=True)
-        
+
         mock_session.run_dir = run_dir
         mock_session.config = mock_config
 
@@ -59,7 +60,7 @@ class TestStorageWithTempDir:
             os.chdir(temp_dir)
             storage = Storage(mock_session)
             storage.log("Test message")
-            
+
             # Check that file exists and contains message
             assert storage.log_path.exists()
             content = storage.log_path.read_text()
@@ -74,7 +75,7 @@ class TestStorageWithTempDir:
         run_dir = temp_dir / "run1"
         run_dir.mkdir(parents=True, exist_ok=True)
         (temp_dir / "runs").mkdir(exist_ok=True)
-        
+
         mock_session.run_dir = run_dir
         mock_session.run_id = "test_run_id"
         mock_session.config = mock_config
@@ -84,9 +85,9 @@ class TestStorageWithTempDir:
             os.chdir(temp_dir)
             storage = Storage(mock_session)
             storage.save_result(duration_seconds=42.5, disconnect_reason="timeout")
-            
+
             # Read CSV and verify data was added
-            with open(storage.csv_path, 'r') as f:
+            with open(storage.csv_path, "r") as f:
                 reader = csv.reader(f)
                 next(reader)  # Skip header
                 row = next(reader)
@@ -102,22 +103,22 @@ class TestStorageWithTempDir:
         run_dir = temp_dir / "run1"
         run_dir.mkdir(parents=True, exist_ok=True)
         (temp_dir / "runs").mkdir(exist_ok=True)
-        
+
         mock_session.run_dir = run_dir
         mock_session.config = mock_config
         csv_path = temp_dir / "runs" / "results.csv"
 
         # Create initial CSV with test data
-        with open(csv_path, 'w') as f:
+        with open(csv_path, "w") as f:
             f.write("test_data\n")
 
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
             storage = Storage(mock_session)
-            
+
             # Verify original content wasn't overwritten
-            with open(storage.csv_path, 'r') as f:
+            with open(storage.csv_path, "r") as f:
                 content = f.read()
                 assert content == "test_data\n"
         finally:

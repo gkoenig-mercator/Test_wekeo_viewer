@@ -19,6 +19,7 @@ def temp_dir():
 def mock_config():
     """Provide a mock Config object."""
     from config import Config
+
     return Config(
         username="test_user",
         password="test_pass",

@@ -1,4 +1,5 @@
 """Tests for session.py"""
+
 import time
 import re
 from session import Session, _generate_hash
@@ -21,7 +22,7 @@ class TestGenerateHash:
     def test_hash_contains_only_lowercase_and_digits(self):
         """Test hash contains only lowercase letters and digits."""
         hash_val = _generate_hash(length=100)
-        assert all(c in 'abcdefghijklmnopqrstuvwxyz0123456789' for c in hash_val)
+        assert all(c in "abcdefghijklmnopqrstuvwxyz0123456789" for c in hash_val)
 
     def test_hash_uniqueness(self):
         """Test that generated hashes are (likely) unique."""
@@ -36,6 +37,7 @@ class TestSession:
     def test_session_initialization(self, mock_config, temp_dir):
         """Test Session initialization creates required attributes."""
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -50,12 +52,15 @@ class TestSession:
         """Test that run_id has correct format: YYYYMMDDhhmmss_xxxx."""
         session = Session(mock_config)
         # Format should be: 20260706_120530_abcd (8 digits + underscore + 6 digits + underscore + 4 chars)
-        pattern = r'^\d{8}_\d{6}_[a-z0-9]{4}$'
-        assert re.match(pattern, session.run_id), f"run_id '{session.run_id}' doesn't match pattern"
+        pattern = r"^\d{8}_\d{6}_[a-z0-9]{4}$"
+        assert re.match(pattern, session.run_id), (
+            f"run_id '{session.run_id}' doesn't match pattern"
+        )
 
     def test_run_dir_path(self, mock_config, temp_dir):
         """Test that run_dir is created under runs/ directory."""
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -68,6 +73,7 @@ class TestSession:
     def test_elapsed_time(self, mock_config, temp_dir):
         """Test elapsed time calculation."""
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
@@ -75,7 +81,7 @@ class TestSession:
             session = Session(mock_config)
             time.sleep(0.1)  # Sleep for 0.1 seconds
             elapsed = session.elapsed()
-            
+
             # Should have elapsed at least 0.1 seconds
             assert elapsed >= 0.05, f"Expected at least 0.05 seconds, got {elapsed}"
         finally:
@@ -84,12 +90,13 @@ class TestSession:
     def test_screenshots_dir_property(self, mock_config, temp_dir):
         """Test screenshots_dir property returns correct path."""
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
             (temp_dir / "runs").mkdir(exist_ok=True)
             session = Session(mock_config)
-            
+
             screenshots_dir = session.screenshots_dir
             assert screenshots_dir.name == "screenshots"
             assert str(screenshots_dir).endswith("screenshots")
@@ -99,6 +106,7 @@ class TestSession:
     def test_setup_dirs_creates_directory(self, mock_config, temp_dir):
         """Test that _setup_dirs creates the run directory."""
         import os
+
         old_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
