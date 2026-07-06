@@ -5,8 +5,10 @@ import random
 import string
 import time
 
+
 def _generate_hash(length=4) -> str:
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
+
 
 class Session:
     def __init__(self, config):

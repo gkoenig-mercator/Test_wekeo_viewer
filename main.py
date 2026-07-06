@@ -8,7 +8,7 @@ from browser import create_browser, create_context
 from auth import accept_cookies, login
 from navigation import navigate_to_dataset
 from monitor import keep_alive
-from utils import log, parse_args
+from utils import parse_args
 
 
 def main():
@@ -34,7 +34,9 @@ def main():
         except Exception as e:
             storage.log(f"Error: {e}")
             storage.save_screenshot(page, "error")
-            storage.save_result(duration_seconds=int(session.elapsed()), disconnect_reason="error")
+            storage.save_result(
+                duration_seconds=int(session.elapsed()), disconnect_reason="error"
+            )
             context.close()
             browser.close()
             return
@@ -44,5 +46,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

@@ -5,6 +5,7 @@ from utils import log, screenshot
 LOGIN_BANNER_SELECTOR = 'a[href*="identity.prod.wekeo2.eu/oauth2/authorize"]'
 # ^ reuse the exact selector _click_login_link already trusts and waits on successfully
 
+
 def is_session_alive(page: Page, timeout: int = 8000) -> bool:
     """
     We detect the login banner (the one containing the OAuth login link).
@@ -12,16 +13,21 @@ def is_session_alive(page: Page, timeout: int = 8000) -> bool:
     We actively wait (poll) rather than snapshot, so we don't mistake
     "banner hasn't rendered yet" for "banner will never appear".
     """
-    if any(k in page.url for k in ("login", "signin", "auth", "identity.prod.wekeo2.eu")):
+    if any(
+        k in page.url for k in ("login", "signin", "auth", "identity.prod.wekeo2.eu")
+    ):
         return False
 
     try:
-        page.locator(LOGIN_BANNER_SELECTOR).first.wait_for(state="visible", timeout=timeout)
+        page.locator(LOGIN_BANNER_SELECTOR).first.wait_for(
+            state="visible", timeout=timeout
+        )
         # Banner showed up within the window -> not authenticated
         return False
     except PWTimeout:
         # Banner never appeared in time -> assume authenticated
         return True
+
 
 def accept_cookies(page: Page, timeout: int = 5000):
     try:
@@ -85,7 +91,7 @@ def _fill_credentials(page: Page, config: Config):
 
 def _check_login_error(page: Page):
     error_el = page.query_selector(
-        '.alert-danger, #error-msg, .login-error, '
+        ".alert-danger, #error-msg, .login-error, "
         'span:has-text("Invalid credentials"), span:has-text("incorrect")'
     )
     if error_el:

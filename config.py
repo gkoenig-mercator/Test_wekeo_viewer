@@ -1,6 +1,6 @@
 import os
 import argparse
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass

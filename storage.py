@@ -3,8 +3,6 @@ from pathlib import Path
 from datetime import datetime
 import csv
 
-from config import Config
-
 
 CSV_HEADERS = [
     "run_id",
@@ -46,20 +44,22 @@ class Storage:
         config = self.session.config
         with open(self.csv_path, "a", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([
-                self.session.run_id,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                duration_seconds,
-                disconnect_reason,
-                config.username,
-                config.dataset_hint,
-                config.layer_hint,
-                config.mouse_interval,
-                config.check_interval,
-                config.headless,
-                config.browser,
-                config.catalogue_url,
-            ])
+            writer.writerow(
+                [
+                    self.session.run_id,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    duration_seconds,
+                    disconnect_reason,
+                    config.username,
+                    config.dataset_hint,
+                    config.layer_hint,
+                    config.mouse_interval,
+                    config.check_interval,
+                    config.headless,
+                    config.browser,
+                    config.catalogue_url,
+                ]
+            )
 
     def save_screenshot(self, page, name: str):
         self.session.screenshots_dir.mkdir(exist_ok=True)
