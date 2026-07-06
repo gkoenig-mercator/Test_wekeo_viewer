@@ -1,5 +1,4 @@
 # utils.py
-import time
 from datetime import datetime
 import argparse
 from playwright.sync_api import Page
