@@ -1,9 +1,6 @@
 """Tests for session.py"""
-import pytest
 import time
 import re
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 from session import Session, _generate_hash
 
 

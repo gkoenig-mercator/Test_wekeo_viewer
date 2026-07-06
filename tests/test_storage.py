@@ -1,9 +1,6 @@
 """Tests for storage.py"""
-import pytest
 import csv
 import os
-from pathlib import Path
-from datetime import datetime
 from unittest.mock import MagicMock
 from storage import Storage, CSV_HEADERS
 
