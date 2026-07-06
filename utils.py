@@ -27,7 +27,7 @@ def dump_visible_text(page: Page, limit: int = 50):
             print(f"  '{t}'")
 
 
-def parse_args():
+def parse_args(args=None):
     parser = argparse.ArgumentParser(
         description="WEkEO Session Timer - simulates a viewer session and measures disconnection time."
     )
@@ -40,4 +40,4 @@ def parse_args():
     parser.add_argument("--check-interval", type=int, default=None)
     parser.add_argument("--headless", action="store_true", default=None)
 
-    return parser.parse_args()
+    return parser.parse_args(args)
