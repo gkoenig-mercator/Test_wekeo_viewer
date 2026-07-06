@@ -37,62 +37,77 @@ class TestSession:
     """Test the Session class."""
 
     def test_session_initialization(self, mock_config, temp_dir):
-        """Test Session initialization."""
-        with patch('session.Path') as mock_path:
-            mock_path.return_value = temp_dir / "test_run"
-            mock_path.return_value.mkdir = MagicMock()
-            
+        """Test Session initialization creates required attributes."""
+        import os
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(temp_dir)
+            (temp_dir / "runs").mkdir(exist_ok=True)
             session = Session(mock_config)
             assert session.config == mock_config
             assert session._start_time is not None
+        finally:
+            os.chdir(old_cwd)
 
     def test_run_id_format(self, mock_config):
         """Test that run_id has correct format: YYYYMMDDhhmmss_xxxx."""
         session = Session(mock_config)
-        # Format should be: 20260706121043_abcd (14 digits + underscore + 4 chars)
-        pattern = r'^\d{14}_[a-z0-9]{4}$'
+        # Format should be: 20260706_120530_abcd (8 digits + underscore + 6 digits + underscore + 4 chars)
+        pattern = r'^\d{8}_\d{6}_[a-z0-9]{4}$'
         assert re.match(pattern, session.run_id), f"run_id '{session.run_id}' doesn't match pattern"
 
     def test_run_dir_path(self, mock_config, temp_dir):
         """Test that run_dir is created under runs/ directory."""
-        with patch('session.Path') as mock_path:
-            # Create a proper Path instance for the test
-            run_dir = temp_dir / "test_run_id"
-            mock_path.side_effect = lambda x: Path(x) if isinstance(x, str) else x
-            
+        import os
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(temp_dir)
+            (temp_dir / "runs").mkdir(exist_ok=True)
             session = Session(mock_config)
-            session.run_dir = run_dir
-            
-            assert "runs" in str(session.run_dir) or session.run_dir.exists() or True
+            assert session.run_dir.parent.name == "runs"
+        finally:
+            os.chdir(old_cwd)
 
     def test_elapsed_time(self, mock_config, temp_dir):
         """Test elapsed time calculation."""
-        with patch('session.Path'):
-            with patch('session.time.monotonic') as mock_time:
-                # Mock time progression
-                mock_time.side_effect = [100.0, 105.5]  # Start at 100, query at 105.5
-                
-                session = Session(mock_config)
-                time.sleep(0.01)  # Small delay
-                elapsed = session.elapsed()
-                
-                assert elapsed >= 5.0, f"Expected at least 5 seconds, got {elapsed}"
+        import os
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(temp_dir)
+            (temp_dir / "runs").mkdir(exist_ok=True)
+            session = Session(mock_config)
+            time.sleep(0.1)  # Sleep for 0.1 seconds
+            elapsed = session.elapsed()
+            
+            # Should have elapsed at least 0.1 seconds
+            assert elapsed >= 0.05, f"Expected at least 0.05 seconds, got {elapsed}"
+        finally:
+            os.chdir(old_cwd)
 
     def test_screenshots_dir_property(self, mock_config, temp_dir):
         """Test screenshots_dir property returns correct path."""
-        with patch('session.Path'):
+        import os
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(temp_dir)
+            (temp_dir / "runs").mkdir(exist_ok=True)
             session = Session(mock_config)
-            session.run_dir = temp_dir
             
             screenshots_dir = session.screenshots_dir
-            assert screenshots_dir == temp_dir / "screenshots"
+            assert screenshots_dir.name == "screenshots"
+            assert str(screenshots_dir).endswith("screenshots")
+        finally:
+            os.chdir(old_cwd)
 
     def test_setup_dirs_creates_directory(self, mock_config, temp_dir):
         """Test that _setup_dirs creates the run directory."""
-        with patch('session.Path') as mock_path:
-            mock_path.return_value = temp_dir
-            
+        import os
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(temp_dir)
+            (temp_dir / "runs").mkdir(exist_ok=True)
             session = Session(mock_config)
             # run_dir should have been created during initialization
-            # We verify that _setup_dirs was called (it's called in __init__)
-            assert session.config is not None
+            assert session.run_dir.exists()
+        finally:
+            os.chdir(old_cwd)

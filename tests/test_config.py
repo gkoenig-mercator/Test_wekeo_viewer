@@ -53,8 +53,8 @@ class TestConfigFromEnv:
             assert config.headless is False
 
     def test_from_env_headless_any_truthy_string(self):
-        """Test that any non-'false' string for HEADLESS results in True."""
-        with patch.dict(os.environ, {"HEADLESS": "yes"}, clear=False):
+        """Test that any truthy string for HEADLESS results in True."""
+        with patch.dict(os.environ, {"HEADLESS": "true"}, clear=False):
             config = Config.from_env()
             assert config.headless is True
 

@@ -38,7 +38,7 @@ class TestParseArgs:
         assert args.browser is None
         assert args.mouse_interval is None
         assert args.check_interval is None
-        assert args.headless is False
+        assert args.headless is None
 
     def test_browser_arg(self):
         """Test specifying browser."""
